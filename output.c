@@ -60,6 +60,8 @@ static void write_str(struct MerakiOutput *m, char* str) {
   memcpy(m->out + insert_point, str, len);
 }
 
+// BUG: newly allocated lines are uninitialized memory, and need to be set to
+// zero
 bool meraki_output_resize(struct MerakiOutput *m, size_t height) {
   m->line_hashes_len = height;
   m->line_hashes = ensure_len(m->line_hashes, &m->line_hashes_cap,
@@ -111,7 +113,6 @@ struct MerakiAttrCode {
 
 #define NUM_ATTRS 7
 struct MerakiAttrCode attr_codes[] = {
-  {MerakiNone, '0'},
   {MerakiBright, '1'},
   {MerakiDim, '2'},
   {MerakiUnderscore, '4'},
@@ -130,7 +131,7 @@ static void meraki_output_set_style(struct MerakiOutput *m,
 
   // keep enough space for the buffer for escape code each attr + a separator 
   // and null terminator
-  static char buffer[NUM_ATTRS*2 + 1];
+  char buffer[NUM_ATTRS*2 + 1];
   size_t cur = 0;
 
   for (int i=0; i<NUM_ATTRS; i++) {

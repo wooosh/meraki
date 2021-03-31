@@ -1,5 +1,7 @@
 #pragma once
 
+#include "output.h"
+
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
@@ -57,4 +59,9 @@ bool meraki_output_draw(struct MerakiOutput *m, size_t screen_y, size_t len,
 
 void meraki_output_commit(struct MerakiOutput *m);
 
+// TODO: meraki_clear_screen
+// TODO: meraki_set_cursor
+// TODO: meraki_show_cursor
+// TODO: meraki_hide_cursor
+// TODO: meraki_cursor_type
 // TODO: meraki_output_scroll
