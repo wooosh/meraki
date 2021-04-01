@@ -6,6 +6,8 @@
 #include <stddef.h>
 #include <stdint.h>
 
+// TODO: document its unicode awareness (or lack thereof)
+
 struct MerakiOutput;
 
 // TODO: take allocator
