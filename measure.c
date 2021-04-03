@@ -1,8 +1,5 @@
 #include "measure.h"
 
-// for wcwidth:
-#define _XOPEN_SOURCE
-
 #include <assert.h>
 #include <stdlib.h>
 #include <sys/types.h>
