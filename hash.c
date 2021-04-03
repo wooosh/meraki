@@ -1,6 +1,7 @@
-#include <hash.h>
 #include <stdint.h>
 #include <stddef.h>
+
+#include "hash.h"
 
 // this is an implementation of the FNV-1a 32 bit hash
 // based off of http://www.isthe.com/chongo/src/fnv/hash_32a.c

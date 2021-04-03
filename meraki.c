@@ -2,10 +2,13 @@
 #include "output.h"
 #include "input.h"
 
+#include <unistd.h>
 #include <stdbool.h>
 #include <sys/ioctl.h>
+#include <termios.h>
+#include <stdio.h>
 
-const struct MerakiTerm MerakiTermInit = {0}; 
+#include "meraki.h"
 
 struct MerakiTerm {
   // int resizefd;
@@ -17,12 +20,14 @@ struct MerakiTerm {
   struct termios old_termios;
 
   // for these to work we need to be in raw mode
-  struct MerakiOutput *out;
-  struct MerakiInput *in;  
+  struct MerakiOutput *output;
+  struct MerakiInput *input;  
 };
 
-bool meraki_term_raw(struct *MerakiTerm m) {
-  if (m->raw_mode) return;
+const struct MerakiTerm MerakiTermInit = {0}; 
+
+bool meraki_term_raw(struct MerakiTerm *m) {
+  if (m->raw_mode) return true;
 
   if (tcgetattr(STDIN_FILENO, &m->old_termios) != -1) {
     return false;
@@ -30,7 +35,7 @@ bool meraki_term_raw(struct *MerakiTerm m) {
 
   // TODO|CLEANUP: write descriptions for each flag
   // https://viewsourcecode.org/snaptoken/kilo/02.enteringRawMode.html
-  struct termios new_termios = old_termios;
+  struct termios new_termios = m->old_termios;
   new_termios.c_iflag &= ~(BRKINT | ICRNL | INPCK | ISTRIP | IXON);
   new_termios.c_oflag &= ~(OPOST);
   new_termios.c_cflag |= (CS8);
@@ -60,13 +65,18 @@ bool meraki_term_raw(struct *MerakiTerm m) {
 }
 
 
-void meraki_term_restore(struct *MerakiTerm m) {
+bool meraki_term_restore(struct MerakiTerm *m) {
   if (m->raw_mode) {
-    tcsetattr(STDIN_FILENO, TCSAFLUSH, m->old_termios);
+    if (tcsetattr(STDIN_FILENO, TCSAFLUSH, &m->old_termios) != -1) {
+      return false;
+    }
+    m->raw_mode = false;
   }
+
+  return true;
 }
 
-struct MerakiOutput *meraki_term_output(struct *MerakiTerm m) {
+struct MerakiOutput *meraki_term_output(struct MerakiTerm *m) {
   if (m->raw_mode) {
     if (m->output == NULL) {
       m->output = meraki_output_create(m->height);

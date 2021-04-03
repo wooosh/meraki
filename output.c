@@ -4,12 +4,10 @@
 #include <sys/types.h>
 #include <assert.h>
 #include <unistd.h>
-
-// debug
 #include <stdio.h>
 
-#include <hash.h>
-#include <output.h>
+#include "hash.h"
+#include "output.h"
 
 struct MerakiOutput {
   // stores output buffer
@@ -38,7 +36,6 @@ static void *ensure_len(void *mem, size_t *cap, size_t len, size_t elem_size) {
     *cap *= 2;
 
     mem = realloc(mem, *cap * elem_size);
-    //memset(mem + old_cap, 0, *cap - old_cap);
   }
 
   return mem;
