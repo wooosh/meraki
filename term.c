@@ -29,6 +29,13 @@ struct MerakiTerm *meraki_term_create() {
 
   if (m != NULL) {
     memset(m, 0, sizeof(struct MerakiTerm));
+
+    // TODO|FEATURE: handle resizing
+    struct winsize w;
+    ioctl(STDOUT_FILENO, TIOCGWINSZ, &w);
+  
+    m->height = w.ws_row;
+    m->width = w.ws_col;
   }
 
   return m;
@@ -69,12 +76,6 @@ bool meraki_term_raw(struct MerakiTerm *m) {
   fflush(stdout);
 
   
-  // TODO|FEATURE: handle resizing
-  struct winsize w;
-  ioctl(STDOUT_FILENO, TIOCGWINSZ, &w);
-  
-  m->height = w.ws_row;
-  m->width = w.ws_col;
 
   m->raw_mode = true;
   
@@ -112,4 +113,9 @@ struct MerakiInput *meraki_term_input(struct MerakiTerm *m) {
   }
 
   return m->input;
+}
+
+void meraki_term_size(struct MerakiTerm *m, size_t *width, size_t *height) {
+  *width = m->width;
+  *height = m->height;
 }

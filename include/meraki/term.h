@@ -19,6 +19,9 @@ bool meraki_term_raw(struct MerakiTerm *m);
 // will be misconfigured
 bool meraki_term_restore(struct MerakiTerm *m);
 
+// writes the terminal size into the parameters given
+void meraki_term_size(struct MerakiTerm *m, size_t *width, size_t *height);
+
 // TODO: assert this:
 // the terminal must be in raw mode for the input and output modules to work 
 struct MerakiOutput *meraki_term_output(struct MerakiTerm *m);
