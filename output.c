@@ -172,13 +172,15 @@ static void meraki_output_set_style(struct MerakiOutput *m,
     }
   }
 
-  if (cur != 0) {
-    buffer[cur-1] = 'm';
-    buffer[cur] = 0;
+  // if escape codes have been written, move the cursor over the ; so it will
+  // get replaced by an m 
+  if (cur != 0) cur--;
 
-    write_str(m, "\x1b[0;");
-    write_str(m, buffer);
-  }
+  buffer[cur-1] = 'm';
+  buffer[cur] = 0;
+
+  write_str(m, "\x1b[0;");
+  write_str(m, buffer);
 }
 
 // writes a rendered line to the output buffer
