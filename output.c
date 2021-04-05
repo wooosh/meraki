@@ -42,6 +42,8 @@ struct MerakiOutput {
   size_t out_len;
   size_t out_cap;
 
+  struct MerakiStyle current_style;
+
   Hash *line_hashes;
   // TODO: automatically update on resize
   size_t line_hashes_len;
@@ -55,7 +57,9 @@ static void *ensure_len(void *mem, size_t *cap, size_t len, size_t elem_size) {
     if (*cap == 0) {
       *cap = 1;
     }
-    *cap *= 2;
+    
+    while (*cap < len)
+      *cap *= 2;
 
     mem = realloc(mem, *cap * elem_size);
   }
@@ -96,6 +100,8 @@ struct MerakiOutput *meraki_output_create(size_t height) {
     return NULL;
 
   memset(m, 0, sizeof(struct MerakiOutput));
+  
+  m->current_style = (struct MerakiStyle){{Meraki8Color, -1}, {Meraki8Color, -1}, MerakiNone};
 
   if (!meraki_output_resize(m, height)) {
     free(m);
@@ -147,8 +153,9 @@ struct MerakiAttrCode attr_codes[] = {
 // returns a null terminated string with the escape codes neccesary to 
 // transition between styles
 static void meraki_output_set_style(struct MerakiOutput *m, 
-                                    struct MerakiStyle prev,
                                     struct MerakiStyle next) {
+  struct MerakiStyle prev = m->current_style;
+
   if (prev.attr == next.attr) return;
 
   // keep enough space for the buffer for escape code each attr + a separator 
@@ -177,12 +184,10 @@ static void meraki_output_set_style(struct MerakiOutput *m,
 // writes a rendered line to the output buffer
 static void meraki_output_write_line(struct MerakiOutput *m, size_t len,
                                      char *text, struct MerakiStyle *styling) {
-  struct MerakiStyle prev = {
-      {Meraki8Color, -1}, {Meraki8Color, -1}, MerakiNone};
   for (size_t i = 0; i < len; i++) {
-    meraki_output_set_style(m, prev, styling[i]);
+    meraki_output_set_style(m, styling[i]);
     write_char(m, text[i]);
-    prev = styling[i];
+    m->current_style = styling[i];
   }
 }
 
@@ -190,7 +195,7 @@ static void meraki_output_write_line(struct MerakiOutput *m, size_t len,
 /*
   Public Drawing API
 */
-bool meraki_output_draw(struct MerakiOutput *m, size_t screen_y, size_t len,
+void meraki_output_draw(struct MerakiOutput *m, size_t screen_y, size_t len,
                         char *text, struct MerakiStyle *styling) {
 
   Hash h = FNV_START;

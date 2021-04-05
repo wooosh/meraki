@@ -34,6 +34,7 @@ enum MerakiAttr {
 enum MerakiColorType { Meraki8Color, Meraki256Color, MerakiTruecolor };
 
 struct MerakiColor {
+  // TODO: try to get rid of the type
   // enum MerakiColorType
   uint8_t type;
   union {
@@ -56,7 +57,7 @@ struct MerakiStyle {
   uint8_t attr;
 };
 
-bool meraki_output_draw(struct MerakiOutput *m, size_t screen_y, size_t len,
+void meraki_output_draw(struct MerakiOutput *m, size_t screen_y, size_t len,
                         char *text, struct MerakiStyle *styling);
 
 void meraki_output_commit(struct MerakiOutput *m);
