@@ -77,13 +77,17 @@ bool meraki_term_restore(struct MerakiTerm *m) {
 }
 
 struct MerakiOutput *meraki_term_output(struct MerakiTerm *m) {
-  if (m->raw_mode) {
-    if (m->output == NULL) {
-      m->output = meraki_output_create(m->height);
-    }
-
-    return m->output;
+  if (m->raw_mode && m->output == NULL) {
+    m->output = meraki_output_create(m->height);
   }
 
-  return NULL;
+  return m->output;
+}
+
+struct MerakiInput *meraki_term_input(struct MerakiTerm *m) {
+  if (m->raw_mode && m->input == NULL) {
+    m->input = meraki_output_create(m->height);
+  }
+
+  return m->input;
 }
