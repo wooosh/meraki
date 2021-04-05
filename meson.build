@@ -8,4 +8,7 @@ src = [
   'meraki.c'
 ]
 
-meraki_lib = both_libraries('meraki', src)
+libmeraki = both_libraries('meraki', src)
+libmeraki_dep = declare_dependency(link_with : libmeraki,
+  include_directories : include_directories('.')
+)
