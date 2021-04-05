@@ -2,13 +2,16 @@ project('meraki', 'c')
 
 src = [
   'measure.c',
-  'hash.c',
   'output.c',
   'input.c',
-  'meraki.c'
+  'term.c'
 ]
 
-libmeraki = both_libraries('meraki', src)
+inc = include_directories('include')
+
+libmeraki = both_libraries('meraki', src,
+  include_directories : inc
+)
 libmeraki_dep = declare_dependency(link_with : libmeraki,
-  include_directories : include_directories('.')
+  include_directories : inc
 )

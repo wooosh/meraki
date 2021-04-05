@@ -6,8 +6,35 @@
 #include <unistd.h>
 #include <stdio.h>
 
-#include "hash.h"
-#include "output.h"
+#include <meraki/output.h>
+
+// TODO: document internals
+
+/*
+  Hashing
+  
+  this is an implementation of the FNV-1a 32 bit hash
+  based off of http://www.isthe.com/chongo/src/fnv/hash_32a.c
+*/
+
+typedef uint32_t Hash;
+
+#define FNV_PRIME ((Hash) 0x01000193)
+#define FNV_START ((Hash) 0x811c9dc5)
+
+static void hash_feed(Hash* h, size_t len, void* buffer) {
+  uint8_t *cursor = buffer;
+  uint8_t *end = cursor + len;
+
+  while (cursor < end) {
+    *h ^= (Hash) *cursor++;
+    *h *= FNV_PRIME;
+  }
+}
+
+/*
+  Memory Management
+*/
 
 struct MerakiOutput {
   // stores output buffer
@@ -21,15 +48,10 @@ struct MerakiOutput {
   size_t line_hashes_cap;
 };
 
-/*
-  Memory Management
-*/
-
 // resizes the memory to fit len if neccesary, uses power of 2 resizing
 // returns the new memory address or null
 static void *ensure_len(void *mem, size_t *cap, size_t len, size_t elem_size) {
   if (len > *cap) {
-    size_t old_cap = *cap;
     if (*cap == 0) {
       *cap = 1;
     }
@@ -83,11 +105,12 @@ struct MerakiOutput *meraki_output_create(size_t height) {
   return m;
 }
 
-void meraki_output_destroy(struct MerakiOutput *m) {
-  free(m->out);
-  free(m->line_hashes);
+void meraki_output_destroy(struct MerakiOutput **m) {
+  free((*m)->out);
+  free((*m)->line_hashes);
+  free(*m);
 
-  memset(m, 0, sizeof(struct MerakiOutput));
+  *m = NULL;
 }
 
 // writes the escape code neccesary to move the cursor to the requested
@@ -168,16 +191,15 @@ static void meraki_output_write_line(struct MerakiOutput *m, size_t len,
 bool meraki_output_draw(struct MerakiOutput *m, size_t screen_y, size_t len,
                         char *text, struct MerakiStyle *styling) {
 
-  Hash h;
-  hash_init(&h);
+  Hash h = FNV_START;
   hash_feed(&h, len, text);
   hash_feed(&h, len * sizeof(struct MerakiStyle), styling);
 
-  if (m->line_hashes[screen_y] != hash_result(&h)) {
-    // meraki_output_move_to(m, 0, screen_y);
+  if (m->line_hashes[screen_y] != h) {
+    meraki_output_move_to(m, 0, screen_y);
     meraki_output_write_line(m, len, text, styling);
 
-    m->line_hashes[screen_y] = hash_result(&h);
+    m->line_hashes[screen_y] = h;
   }
 }
 

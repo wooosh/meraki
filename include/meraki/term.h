@@ -6,7 +6,10 @@
 #include <stdbool.h>
 
 struct MerakiTerm;
-extern const struct MerakiTerm MerakiTermInit;
+
+// TODO: accept configuration for unicode, terminal fd, colors, etc
+struct MerakiTerm *meraki_term_create();
+void meraki_term_destroy(struct MerakiTerm **m);
 
 // all functions return true on success
 

@@ -1,14 +1,14 @@
-#include "meraki.h"
-#include "output.h"
-#include "input.h"
+#include <meraki/term.h>
+#include <meraki/output.h>
+#include <meraki/input.h>
 
+#include <stdlib.h>
+#include <string.h>
 #include <unistd.h>
 #include <stdbool.h>
 #include <sys/ioctl.h>
 #include <termios.h>
 #include <stdio.h>
-
-#include "meraki.h"
 
 struct MerakiTerm {
   // int resizefd;
@@ -24,7 +24,24 @@ struct MerakiTerm {
   struct MerakiInput *input;  
 };
 
-const struct MerakiTerm MerakiTermInit = {0}; 
+struct MerakiTerm *meraki_term_create() {
+  struct MerakiTerm *m = malloc(sizeof(struct MerakiTerm));
+
+  if (m != NULL) {
+    memset(m, 0, sizeof(struct MerakiTerm));
+  }
+
+  return m;
+}
+
+void meraki_term_destroy(struct MerakiTerm **m) {
+  if ((*m)->output) meraki_output_destroy(&(*m)->output);
+  if ((*m)->input) meraki_input_destroy(&(*m)->input);
+
+  free(*m);
+
+  *m = NULL;
+}
 
 bool meraki_term_raw(struct MerakiTerm *m) {
   if (m->raw_mode) return true;

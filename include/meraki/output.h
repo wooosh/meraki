@@ -14,7 +14,7 @@ struct MerakiOutput;
 // returns null on failed alloc
 struct MerakiOutput *meraki_output_create(size_t height);
 
-void meraki_output_destroy(struct MerakiOutput *m);
+void meraki_output_destroy(struct MerakiOutput **m);
 
 // returns true if it could not resize
 bool meraki_output_resize(struct MerakiOutput *m, size_t height);

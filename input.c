@@ -7,7 +7,7 @@
 #include <unistd.h>
 #include <stdlib.h>
 
-#include "input.h"
+#include <meraki/input.h>
 
 // TODO: expose errors in a cleaner way instead of using assert
 // TODO|CLEANUP: describe how the terminal input system works at the top
