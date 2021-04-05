@@ -139,7 +139,7 @@ struct MerakiAttrCode {
   char code; 
 };
 
-#define NUM_ATTRS 7
+#define NUM_ATTRS 6
 struct MerakiAttrCode attr_codes[] = {
   {MerakiBright, '1'},
   {MerakiDim, '2'},
