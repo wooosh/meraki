@@ -173,11 +173,11 @@ static void meraki_output_set_style(struct MerakiOutput *m,
   }
 
   // if escape codes have been written, move the cursor over the ; so it will
-  // get replaced by an m 
+  // be treated like the end of the string
   if (cur != 0) cur--;
 
-  buffer[cur-1] = 'm';
-  buffer[cur] = 0;
+  buffer[cur] = 'm';
+  buffer[cur+1] = 0;
 
   write_str(m, "\x1b[0;");
   write_str(m, buffer);
