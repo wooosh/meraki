@@ -46,7 +46,7 @@ void meraki_term_destroy(struct MerakiTerm **m) {
 bool meraki_term_raw(struct MerakiTerm *m) {
   if (m->raw_mode) return true;
 
-  if (tcgetattr(STDIN_FILENO, &m->old_termios) != -1) {
+  if (tcgetattr(STDIN_FILENO, &m->old_termios) == -1) {
     return false;
   }
 
@@ -60,7 +60,7 @@ bool meraki_term_raw(struct MerakiTerm *m) {
   new_termios.c_cc[VMIN] = 0;
   new_termios.c_cc[VTIME] = 1;
 
-  if (tcsetattr(STDIN_FILENO, TCSAFLUSH, &new_termios) != -1) {
+  if (tcsetattr(STDIN_FILENO, TCSAFLUSH, &new_termios) == -1) {
     return false;
   }
 
@@ -84,7 +84,7 @@ bool meraki_term_raw(struct MerakiTerm *m) {
 
 bool meraki_term_restore(struct MerakiTerm *m) {
   if (m->raw_mode) {
-    if (tcsetattr(STDIN_FILENO, TCSAFLUSH, &m->old_termios) != -1) {
+    if (tcsetattr(STDIN_FILENO, TCSAFLUSH, &m->old_termios) == -1) {
       return false;
     }
     m->raw_mode = false;
@@ -103,7 +103,7 @@ struct MerakiOutput *meraki_term_output(struct MerakiTerm *m) {
 
 struct MerakiInput *meraki_term_input(struct MerakiTerm *m) {
   if (m->raw_mode && m->input == NULL) {
-    m->input = meraki_output_create(m->height);
+    m->input = meraki_input_create(m->height);
   }
 
   return m->input;
