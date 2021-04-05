@@ -117,9 +117,11 @@ void meraki_output_destroy(struct MerakiOutput **m) {
 // position on screen
 static void meraki_output_move_to(struct MerakiOutput *m, size_t x, size_t y) {
   size_t escape_len = snprintf(NULL, 0, "\x1b[%zu;%zuH", y + 1, x + 1);
-  m->out = ensure_len(m->out, &m->out_cap, m->out_len + escape_len, 1);
+  // TODO: document properly that the +1 is for null terminator
+  m->out = ensure_len(m->out, &m->out_cap, m->out_len + escape_len + 1, 1);
 
-  snprintf(m->out + m->out_len, escape_len, "\x1b[%zu;%zuH", x + 1, y + 1);
+  snprintf(m->out + m->out_len, escape_len + 1, "\x1b[%zu;%zuH", y + 1, x + 1);
+  // subtract one from the escape length because it includes a null terminator
   m->out_len += escape_len;
 }
 

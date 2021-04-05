@@ -87,6 +87,11 @@ bool meraki_term_restore(struct MerakiTerm *m) {
     if (tcsetattr(STDIN_FILENO, TCSAFLUSH, &m->old_termios) == -1) {
       return false;
     }
+
+    printf("\x1b[?1049l" // restore buffer
+           "\x1b[\x32 q" // change back to block cursor
+           "\x1b[0m");   // reset colors
+
     m->raw_mode = false;
   }
 
