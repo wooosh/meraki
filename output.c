@@ -119,17 +119,6 @@ void meraki_output_destroy(struct MerakiOutput **m) {
   *m = NULL;
 }
 
-// writes the escape code neccesary to move the cursor to the requested
-// position on screen
-static void meraki_output_move_to(struct MerakiOutput *m, size_t x, size_t y) {
-  size_t escape_len = snprintf(NULL, 0, "\x1b[%zu;%zuH", y + 1, x + 1);
-  // TODO: document properly that the +1 is for null terminator
-  m->out = ensure_len(m->out, &m->out_cap, m->out_len + escape_len + 1, 1);
-
-  snprintf(m->out + m->out_len, escape_len + 1, "\x1b[%zu;%zuH", y + 1, x + 1);
-  // subtract one from the escape length because it includes a null terminator
-  m->out_len += escape_len;
-}
 
 /*
   Line Formatting
@@ -197,6 +186,19 @@ static void meraki_output_write_line(struct MerakiOutput *m, size_t len,
 /*
   Public Drawing API
 */
+
+// writes the escape code neccesary to move the cursor to the requested
+// position on screen
+void meraki_output_cursor_move(struct MerakiOutput *m, size_t x, size_t y) {
+  size_t escape_len = snprintf(NULL, 0, "\x1b[%zu;%zuH", y + 1, x + 1);
+  // TODO: document properly that the +1 is for null terminator
+  m->out = ensure_len(m->out, &m->out_cap, m->out_len + escape_len + 1, 1);
+
+  snprintf(m->out + m->out_len, escape_len + 1, "\x1b[%zu;%zuH", y + 1, x + 1);
+  // subtract one from the escape length because it includes a null terminator
+  m->out_len += escape_len;
+}
+
 void meraki_output_draw(struct MerakiOutput *m, size_t screen_y, size_t len,
                         char *text, struct MerakiStyle *styling) {
 
@@ -205,7 +207,7 @@ void meraki_output_draw(struct MerakiOutput *m, size_t screen_y, size_t len,
   hash_feed(&h, len * sizeof(struct MerakiStyle), styling);
 
   if (m->line_hashes[screen_y] != h) {
-    meraki_output_move_to(m, 0, screen_y);
+    meraki_output_cursor_move(m, 0, screen_y);
     meraki_output_write_line(m, len, text, styling);
 
     m->line_hashes[screen_y] = h;
@@ -215,4 +217,12 @@ void meraki_output_draw(struct MerakiOutput *m, size_t screen_y, size_t len,
 void meraki_output_commit(struct MerakiOutput *m) {
   write(STDOUT_FILENO, m->out, m->out_len);
   m->out_len = 0;
+}
+
+void meraki_output_cursor_show(struct MerakiOutput *m) {
+  write_str(m, "\x1b[?25h");
+}
+
+void meraki_output_cursor_hide(struct MerakiOutput *m) {
+  write_str(m, "\x1b[?25l");
 }

@@ -57,14 +57,17 @@ struct MerakiStyle {
   uint8_t attr;
 };
 
+// TODO: handle failed allocations
 void meraki_output_draw(struct MerakiOutput *m, size_t screen_y, size_t len,
                         char *text, struct MerakiStyle *styling);
 
+// display currently buffered changes
 void meraki_output_commit(struct MerakiOutput *m);
 
+void meraki_output_cursor_show(struct MerakiOutput *m);
+void meraki_output_cursor_hide(struct MerakiOutput *m);
+void meraki_output_cursor_move(struct MerakiOutput *m, size_t x, size_t y);
+
 // TODO: meraki_clear_screen
-// TODO: meraki_set_cursor
-// TODO: meraki_show_cursor
-// TODO: meraki_hide_cursor
 // TODO: meraki_cursor_type
 // TODO: meraki_output_scroll
