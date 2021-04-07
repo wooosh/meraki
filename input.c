@@ -39,7 +39,6 @@ void meraki_input_destroy(struct MerakiInput **m) {
 // refills the seq buffer. sets available to 0 in the event of an error
 static void input_queue_refill(struct MerakiInput *inqueue) {
   // if there is data available, only check for new immediately available data
-  printf("%zu\n", inqueue->available);
   int timeout = -1;
   if (inqueue->available > 0) {
     timeout = 0;

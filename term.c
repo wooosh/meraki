@@ -91,6 +91,7 @@ bool meraki_term_restore(struct MerakiTerm *m) {
 
     printf("\x1b[?1049l" // restore buffer
            "\x1b[\x32 q" // change back to block cursor
+           "\x1b[?25h"   // show cursor
            "\x1b[0m");   // reset colors
 
     m->raw_mode = false;
