@@ -157,8 +157,8 @@ struct MerakiKey meraki_read_key(struct MerakiInput *inqueue) {
 
   // the ASCII code for ctrl-letter is letter - 0x60, so we convert control
   // characters base key to their alphabet version, with the exception of \r
-  // because it represents enter
-  if (k.control && k.base != '\r') {
+  // because it represents enter, and \x1b since it represents escape
+  if (k.control && k.base != '\r' && k.base != '\x1b') {
     k.base += 0x60;
   }
   

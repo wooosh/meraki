@@ -6,6 +6,7 @@
 struct MerakiKey {
   enum MerakiKeyBase {
     // TODO: figure out how to handle backspace properly
+    MerakiEscape = 0x1b,
 
     // All values before Backspace use their ASCII value
     MerakiBackspace = 127,
