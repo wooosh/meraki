@@ -180,6 +180,7 @@ static void meraki_output_write_line(struct MerakiOutput *m, size_t len,
     write_char(m, text[i]);
     m->current_style = styling[i];
   }
+  write_str(m, "\x1b[K");
 }
 
 
