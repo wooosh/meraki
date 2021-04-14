@@ -144,7 +144,6 @@ struct MerakiAttrCode attr_codes[] = {
 static void meraki_output_set_style(struct MerakiOutput *m, 
                                     struct MerakiStyle next) {
   struct MerakiStyle prev = m->current_style;
-
   if (prev.attr == next.attr) return;
 
   // keep enough space for the buffer for escape code each attr + a separator 
@@ -153,8 +152,7 @@ static void meraki_output_set_style(struct MerakiOutput *m,
   size_t cur = 0;
 
   for (int i=0; i<NUM_ATTRS; i++) {
-    enum MerakiAttr attr = attr_codes[i].attr;
-    if (!(prev.attr & attr) && next.attr & attr) {
+    if (next.attr & attr_codes[i].attr) {
       buffer[cur] = attr_codes[i].code;
       buffer[cur+1] = ';';
       cur += 2;
