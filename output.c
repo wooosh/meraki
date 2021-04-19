@@ -173,12 +173,12 @@ static void meraki_output_set_style(struct MerakiOutput *m,
 // writes a rendered line to the output buffer
 static void meraki_output_write_line(struct MerakiOutput *m, size_t len,
                                      char *text, struct MerakiStyle *styling) {
+  write_str(m, "\x1b[K");
   for (size_t i = 0; i < len; i++) {
     meraki_output_set_style(m, styling[i]);
     write_char(m, text[i]);
     m->current_style = styling[i];
   }
-  write_str(m, "\x1b[K");
 }
 
 
