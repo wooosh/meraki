@@ -5,6 +5,7 @@
 #include <assert.h>
 #include <unistd.h>
 #include <stdio.h>
+#include <inttypes.h>
 
 #include <meraki/output.h>
 
@@ -138,36 +139,79 @@ struct MerakiAttrCode attr_codes[] = {
   {MerakiHidden, '8'},
 };
 
+static bool meraki_color_equal(struct MerakiColor a, struct MerakiColor b) {
+  if (a.type == b.type) {
+    // TODO: MerakiIndexColor
+    if (a.type == Meraki8Color) {
+      return a.color16 == b.color16;
+    } else if (a.type == MerakiTruecolor) {
+      return (a.color_true.r == b.color_true.r) &&
+             (a.color_true.g == b.color_true.g) &&
+             (a.color_true.b == b.color_true.b);
+    }
+  }
+  return false;
+}
+
+// color escape is 'XXX;'
+#define MAX_COLOR_ESC_LEN 3 + 1
+// returns number of characters written
+static int meraki_set_color(size_t len, char *buffer, struct MerakiColor prev, struct MerakiColor next) {
+  // TODO: truecolor
+  if (meraki_color_equal(prev, next)) return 0;
+  
+  if (next.type == Meraki8Color) {
+    // reset needs no escape code
+    if (next.color16 == -1) return 0;
+    // TODO: handle negative return value
+    return snprintf(buffer, len, "%" PRId16 ";", next.color16);
+  } else {
+    assert(0);
+  }
+}
+
+
+/* allocate space for:
+    - fg and bg color escapes
+    - each attr + its semicolon
+    - null terminator
+*/
+#define MAX_STYLE_LEN (MAX_COLOR_ESC_LEN*2 + NUM_ATTRS*2 + 1)
 // TODO: colors
 // returns a null terminated string with the escape codes neccesary to 
 // transition between styles
 static void meraki_output_set_style(struct MerakiOutput *m, 
                                     struct MerakiStyle next) {
   struct MerakiStyle prev = m->current_style;
-  if (prev.attr == next.attr) return;
-
-  // keep enough space for the buffer for escape code each attr + a separator 
-  // and null terminator
-  char buffer[NUM_ATTRS*2 + 1];
+  char buffer[MAX_STYLE_LEN];
   size_t cur = 0;
-
-  for (int i=0; i<NUM_ATTRS; i++) {
-    if (next.attr & attr_codes[i].attr) {
-      buffer[cur] = attr_codes[i].code;
-      buffer[cur+1] = ';';
-      cur += 2;
+  if (prev.attr != next.attr) {
+    // keep enough space for the buffer for escape code each attr + a separator 
+    // and null terminator
+  
+    for (int i=0; i<NUM_ATTRS; i++) {
+      if (next.attr & attr_codes[i].attr) {
+        buffer[cur] = attr_codes[i].code;
+        buffer[cur+1] = ';';
+        cur += 2;
+      }
     }
   }
 
+  cur += meraki_set_color(MAX_STYLE_LEN - cur, buffer + cur, prev.fg, next.fg);
+  cur += meraki_set_color(MAX_STYLE_LEN - cur, buffer + cur, prev.bg, next.bg);
+
   // if escape codes have been written, move the cursor over the ; so it will
   // be treated like the end of the string
-  if (cur != 0) cur--;
+  if (cur != 0) {
+    cur--;
 
-  buffer[cur] = 'm';
-  buffer[cur+1] = 0;
+    buffer[cur] = 'm';
+    buffer[cur+1] = 0;
 
-  write_str(m, "\x1b[0;");
-  write_str(m, buffer);
+    write_str(m, "\x1b[0;");
+    write_str(m, buffer);
+  }
 }
 
 // writes a rendered line to the output buffer

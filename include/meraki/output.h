@@ -19,6 +19,7 @@ void meraki_output_destroy(struct MerakiOutput **m);
 // returns true if it could not resize
 bool meraki_output_resize(struct MerakiOutput *m, size_t height);
 
+// TODO: remove MerakiNone
 // drawing api
 enum MerakiAttr {
   MerakiNone = 1 << 0,
@@ -31,7 +32,9 @@ enum MerakiAttr {
   MerakiHidden = 1 << 6,
 };
 
-enum MerakiColorType { Meraki8Color, Meraki256Color, MerakiTruecolor };
+// TODO: change Meraki8Color and Meraki256Color to MerakiIndexColor
+// TODO: MerakiTruecolor -> MerakiRGB
+enum MerakiColorType { Meraki8Color, MerakiTruecolor };
 
 struct MerakiColor {
   // TODO: try to get rid of the type
@@ -39,8 +42,7 @@ struct MerakiColor {
   uint8_t type;
   union {
     // -1 == reset
-    int8_t color16;
-    int8_t color256;
+    int16_t color16;
     struct {
       uint8_t r;
       uint8_t g;
